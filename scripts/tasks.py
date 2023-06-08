@@ -182,6 +182,32 @@ def find_peaks(config):
     logger.info(f'Saving CXI files and summary to {taskdir}/r{setup.run:04}')
     logger.debug('Done!')
 
+def find_peaks_by_peaknet(config):
+    from btx.processing.peaknet import PeakFinder
+    from btx.misc.shortcuts import fetch_latest
+    setup = config.setup
+    task = config.find_peaks_by_peaknet
+    """ Perform adaptive peak finding on run. """
+    taskdir = os.path.join(setup.root_dir, 'index')
+    os.makedirs(taskdir, exist_ok=True)
+    mask_file = fetch_latest(fnames=os.path.join(setup.root_dir, 'mask', 'r*.npy'), run=setup.run)
+    pf = PeakFinder(exp=setup.exp, run=setup.run, det_type=setup.det_type, outdir=os.path.join(taskdir ,f"r{setup.run:04}"),
+                    event_receiver=setup.get('event_receiver'), event_code=setup.get('event_code'), event_logic=setup.get('event_logic'),
+                    tag=task.tag, mask=mask_file, psana_mask=task.psana_mask, min_peaks=task.min_peaks, max_peaks=task.max_peaks,
+                    npix_min=task.npix_min, npix_max=task.npix_max, amax_thr=task.amax_thr, atot_thr=task.atot_thr,
+                    son_min=task.son_min, peak_rank=task.peak_rank, r0=task.r0, dr=task.dr, nsigm=task.nsigm,
+                    calibdir=task.get('calibdir'), pv_camera_length=setup.get('pv_camera_length'))
+    logger.debug(f'Performing peak finding for run {setup.run} of {setup.exp}...')
+    pf.find_peaks()
+    pf.curate_cxi()
+    pf.summarize()
+    try:
+        pf.report(update_url)
+    except:
+        logger.debug("Could not communicate with the elog update url")
+    logger.info(f'Saving CXI files and summary to {taskdir}/r{setup.run:04}')
+    logger.debug('Done!')
+
 def index(config):
     from btx.processing.indexer import Indexer
     from btx.misc.shortcuts import fetch_latest

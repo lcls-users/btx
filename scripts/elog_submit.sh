@@ -129,6 +129,7 @@ QUEUE=${QUEUE:='milano'}
 CORES=${CORES:=1}
 # TODO: find_peaks needs to be handled from ischeduler. For now we do this...
 if [ ${TASK} != 'find_peaks' ] &&\
+   [ ${TASK} != 'find_peaks_by_peaknet' ] &&\
    [ ${TASK} != 'stream_analysis' ] &&\
    [ ${TASK} != 'determine_cell' ] &&\
    [ ${TASK} != 'opt_geom' ]; then
@@ -143,7 +144,8 @@ if [ ${RUN_NUM} != 'None' ]; then
 fi
 
 ANA_CONDA_MANAGE="${ANA_CONDA_DIR}conda1/manage/bin/"
-ANA_CONDA_BIN="${ANA_CONDA_DIR}conda1/inst/envs/ana-4.0.47-py3/bin/"
+## ANA_CONDA_BIN="${ANA_CONDA_DIR}conda1/inst/envs/ana-4.0.47-py3/bin/"
+ANA_CONDA_BIN="/cds/sw/package/conda_envs/cwang31/peaknet-1.0/bin/"
 WHICHPYTHON="${ANA_CONDA_BIN}python"
 WHICHMPIRUN="${ANA_CONDA_BIN}mpirun"
 
@@ -174,8 +176,10 @@ ${SBATCH_CMD_ACCOUNT}
 #SBATCH --exclusive
 #SBATCH --job-name ${TASK}
 #SBATCH --ntasks=${CORES}
+#SBATCH --gres=gpu:1080ti:1
 
 source "${ANA_CONDA_MANAGE}psconda.sh"
+conda activate /cds/sw/package/conda_envs/cwang31/peaknet-1.0
 conda env list | grep '*'
 which mpirun
 which python
