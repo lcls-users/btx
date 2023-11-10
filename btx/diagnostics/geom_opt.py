@@ -76,10 +76,18 @@ class GeomOpt:
         """
         
         if type(powder) == str:
-            powder_img = np.load(powder)
+            if os.path.isfile(powder):
+                print("Loading powder from {powder}")
+                powder_img = np.load(powder)
+            else:
+                print("Computing powder over all events")
+                self.diagnostics.compute_run_stats(powder_only=True)
+                if self.diagnostics.psi.det_type != 'Rayonix':
+                    powder_img = assemble_image_stack_batch(self.diagnostics.powders['max'],
+                                                            self.diagnostics.pixel_index_map)
         elif type(powder) == int:
-            print("Computing powder from scratch")
-            self.diagnostics.compute_run_stats(n_images=powder, powder_only=True)
+            print("Computing powder over {powder} events")
+            self.diagnostics.compute_run_stats(max_events=powder, powder_only=True)
             if self.diagnostics.psi.det_type != 'Rayonix':
                 powder_img = assemble_image_stack_batch(self.diagnostics.powders['max'], 
                                                         self.diagnostics.pixel_index_map)
