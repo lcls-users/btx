@@ -167,7 +167,7 @@ def find_peaks(config):
     from btx.misc.shortcuts import fetch_latest
     from btx.interfaces.ielog import update_summary
     setup = config.setup
-    task = config.find_peaks
+    task = config.find_peaksyaml
     """ Perform adaptive peak finding on run. """
     taskdir = os.path.join(setup.root_dir, 'index')
     os.makedirs(taskdir, exist_ok=True)
@@ -787,28 +787,67 @@ def bo_aggregate_init_samples(config):
     BayesianOptimization.aggregate_init_samples(config, logger)
 
 def make_histogram(config):
-    from ...
+    from btx.processing.xppmask import MakeHistogram
     setup = config.setup
     task = config.make_histogram
-    """  """
-    taskdir = os.path.join(setup.root_dir, 'mask')
-    os.makedirs(taskdir, exist_ok=True)
-    ...
 
-def measure_emd(config):
-    from ...
+    hist_maker = MakeHistogram(config)
+    hist_maker.load_data()
+    hist_maker.generate_histograms()
+    hist_maker.summarize()
+    hist_maker.report(setup.get('elog_report'))
+    
+    output_dir = os.path.join(setup.root_dir, task.output_dir)
+    os.makedirs(output_dir, exist_ok=True)
+    
+    hist_maker.save_histograms()
+
+def calculate_emd(config):
+    from btx.processing.xppmask import MeasureEMD
     setup = config.setup
     task = config.measure_emd
-    """  """
-    taskdir = os.path.join(setup.root_dir, 'mask')
-    os.makedirs(taskdir, exist_ok=True)
-    ...
 
-def build_pump_probe_mask(config):
-    from ...
+    emd_calculator = MeasureEMD(config)
+    emd_calculator.load_histograms()
+    emd_calculator.calculate_emd()
+    #emd_calculator.generate_null_distribution()
+    emd_calculator.summarize()
+    emd_calculator.report(setup.get('elog_report'))
+
+    output_dir = os.path.join(setup.root_dir, task.output_dir)
+    os.makedirs(output_dir, exist_ok=True)
+
+    emd_calculator.save_emd_values()
+    emd_calculator.save_null_distribution()
+
+def generate_masks(config):
+    from btx.processing.xppmask import BuildPumpProbeMasks
     setup = config.setup
     task = config.build_pump_probe_mask
-    """  """
-    taskdir = os.path.join(setup.root_dir, 'mask')
-    os.makedirs(taskdir, exist_ok=True)
-    ...
+
+    mask_builder = BuildPumpProbeMasks(config)
+    mask_builder.load_p_values()
+    mask_builder.generate_masks()
+    mask_builder.summarize()
+    mask_builder.report(setup.get('elog_report'))
+
+    output_dir = os.path.join(setup.root_dir, task.output_dir)
+    os.makedirs(output_dir, exist_ok=True)
+
+    mask_builder.save_masks()
+
+def calculate_p_values(config):
+    from btx.processing.xppmask import CalculatePValues
+    setup = config.setup
+    task = config.calculate_p_values
+
+    p_value_calculator = CalculatePValues(config)
+    p_value_calculator.load_data()
+    p_value_calculator.calculate_p_values()
+    p_value_calculator.summarize()
+    p_value_calculator.report(setup.get('elog_report'))
+
+    output_dir = os.path.join(setup.root_dir, task.output_dir)
+    os.makedirs(output_dir, exist_ok=True)
+
+    p_value_calculator.save_p_values()

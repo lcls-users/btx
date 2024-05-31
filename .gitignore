@@ -6,3 +6,4 @@ __pycache__/
 
 # cli -tmp yaml
 tutorial/*-tmp.yaml
+.aider*

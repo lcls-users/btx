@@ -1,15 +1,39 @@
 setup:
   queue: 'milano'
-  root_dir: '/sdf/data/lcls/ds/xpp/xppXXXXX'
-  exp: 'xppXXXXX'
+  root_dir: '/sdf/data/lcls/ds/xpp/xppx1003221'
+  output_dir: 'output'
+  exp: 'xppx1003221'
   run: 15
   det_type: 'XXXX'
+  background_roi_coords: [50, 100, 0, 200]
+
+load_data:
+  run_number: 1
+  experiment_number: 'xppx1003221'
+  roi: [5,105,50,250]
+  energy_filter: [8.8, 5]
+  i0_threshold: 200
+  ipm_pos_filter: [0.2, 0.5]
+  time_bin: 2
+  time_tool: [0., 0.005]
 
 make_histogram:
+  input_file: 'data.npz' # optional parameter for bypassing the load_data task by using a pre-generated dataset instead
 
-measure_emd:
-  roi:
-  ...
+calculate_emd:
+  num_permutations: 1000
 
-build_pump_probe_mask:
-  threshold:
+calculate_p_values:
+
+generate_masks:
+  threshold: 0.15
+  bg_mask_mult: 2.0
+  bg_mask_thickness: 5
+
+pump_probe_analysis:
+  i0_threshold: 1000
+  ipm_pos_filter: [0.1, 0.1]
+  time_bin: 0.1
+  time_tool: [1, 1000]
+  energy_filter: [1.0, 0.1]
+  min_count: 200
