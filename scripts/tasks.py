@@ -90,6 +90,10 @@ def run_analysis(config):
     script_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),  "../btx/diagnostics/run.py")
     command = f"python {script_path}"
     command += f" -e {setup.exp} -r {setup.run} -d {setup.det_type} -o {taskdir}"
+    if hasattr(setup, 'xtcdir'):
+        command += f" -x {setup.xtcdir}"
+    if hasattr(setup, 'hutch'):
+        command += f" --hutch {setup.hutch}"
     if mask_file:
         command += f" -m {mask_file}"
     if task.get('mean_threshold') is not None:
